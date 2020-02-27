@@ -199,6 +199,53 @@ public class MKSCommand {
 		}
 		return result;
 	}
+	
+	/**
+	 * 根据Ids查询字段的值
+	 * 
+	 * @param ids
+	 * @param fields
+	 * @return
+	 * @throws APIException
+	 */
+	public List<Map<String, String>> findItemsByIDs(List<String> ids, List<String> fields) throws Exception {
+		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+		Command cmd = new Command("im", "issues");
+		MultiValue mv = new MultiValue();
+		mv.setSeparator(",");
+		for (String field : fields) {
+			mv.add(field);
+		}
+		Option op = new Option("fields", mv);
+		cmd.addOption(op);
+
+		SelectionList sl = new SelectionList();
+		for (String id : ids) {
+			sl.add(id);
+		}
+		cmd.setSelectionList(sl);
+
+		Response res = null;
+		try {
+			res = mksCmdRunner.execute(cmd);
+			WorkItemIterator it = res.getWorkItems();
+			while (it.hasNext()) {
+				WorkItem wi = it.next();
+				Map<String, String> map = new HashMap<String, String>();
+				Iterator fieldIte = wi.getFields();
+				while(fieldIte.hasNext()){
+					Field field = (Field)fieldIte.next();
+					map.put(field.getDisplayName(), field.getValueAsString());
+				}
+				list.add(map);
+			}
+		} catch (APIException e) {
+			// success = false;
+			logger.error(APIExceptionUtil.getMsg(e));
+			throw new Exception(APIExceptionUtil.getMsg(e));
+		}
+		return list;
+	}
 
 	/**
 	 * 根据Ids查询字段的值
@@ -293,7 +340,84 @@ public class MKSCommand {
 		cmd.addSelection(id);
 		mksCmdRunner.execute(cmd);
 	}
+	
+	public SelectionList contains(SelectionList documents) throws APIException {
+		return relationshipValues("Contains", documents);
+	}
 
+	public SelectionList relationshipValues(String fieldName, SelectionList ids) throws APIException {
+		if (fieldName == null) {
+			throw new APIException("invoke fieldValues() ----- fieldName is null.");
+		}
+		if (ids == null || ids.size() < 1) {
+			throw new APIException("invoke fieldValues() ----- ids is null or empty.");
+		}
+		Command command = new Command(Command.IM, "issues");
+		command.addOption(new Option("fields", fieldName));
+		command.setSelectionList(ids);
+		Response res = mksCmdRunner.execute(command);
+		WorkItemIterator it = res.getWorkItems();
+		SelectionList contents = new SelectionList();
+		while (it.hasNext()) {
+			WorkItem wi = it.next();
+			ItemList il = (ItemList) wi.getField(fieldName).getList();
+			if(il != null) {
+				for (int i = 0; i < il.size(); i++) {
+					Item item = (Item) il.get(i);
+					String id = item.getId();
+					contents.add(id);
+				}
+			}
+		}
+		return contents;
+	}
+	
+	public List<String> allContents(String document) throws APIException ,Exception {
+		List<String> returnResult = new ArrayList<>();
+		Command command = new Command("im", "issues");
+		command.addOption(new Option("fields", "contains"));
+		command.addSelection(document);
+		Response res = mksCmdRunner.execute(command);
+		WorkItemIterator it = res.getWorkItems();
+		SelectionList sl = new SelectionList();
+		List<String> fields = new ArrayList<>();
+		fields.add("ID");
+		while (it.hasNext()) {
+			WorkItem wi = it.next();
+			ItemList il = (ItemList) wi.getField("contains").getList();
+			for (int i = 0; i < il.size(); i++) {
+				Item item = (Item) il.get(i);
+				String id = item.getId();
+				sl.add(id);
+			}
+		}
+		SelectionList contents = null;
+		if (sl != null && sl.size() >= 1) {
+			contents = contains(sl);
+
+			if (contents.size() > 0) {
+				SelectionList contains = new SelectionList();
+				contains.add(contents);
+				while (true) {
+					SelectionList conteins = contains(contains);
+					if (conteins.size() < 1) {
+						break;
+					}
+					contents.add(conteins);
+					contains = new SelectionList();
+					contains.add(conteins);
+				}
+			}
+			contents.add(sl);
+		}
+		if(contents.size()>0){
+			for(int i=0; i<contents.size(); i++){
+				returnResult.add(contents.getSelection(i));
+			}
+		}
+		return returnResult;
+	}
+	
 	public List<Map<String, Object>> getResult(String sessionID, String suiteID, String type) throws APIException {
 		List<Map<String, Object>> result = new ArrayList<>();
 		Command cmd = new Command("tm", "results");
@@ -800,11 +924,21 @@ public class MKSCommand {
 		if (annotation != null && !annotation.equals("")){
 			cmd.addOption(new Option("annotation",annotation));
 		}
-		cmd.addOption(new Option("field","Observed Result="+observedResult));
-		cmd.addOption(new Option("field","Result Serverity="+serverity));
-		cmd.addOption(new Option("field","Reproducibility="+reproducibility));
-		cmd.addOption(new Option("field","SW Version="+SWVersion));
-		cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		if (observedResult != null && !observedResult.equals("")){
+			cmd.addOption(new Option("field","Observed Result="+observedResult));
+		}
+		if (serverity != null && !serverity.equals("")){
+			cmd.addOption(new Option("field","Result Serverity="+serverity));
+		}
+		if (reproducibility != null && !reproducibility.equals("")){
+			cmd.addOption(new Option("field","Result Serverity="+reproducibility));
+		}
+		if (SWVersion != null && !SWVersion.equals("")){
+			cmd.addOption(new Option("field","SW Version="+SWVersion));
+		}
+		if (HWVerdion != null && !HWVerdion.equals("")){
+			cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		}
 		cmd.addSelection(caseID);
 		try{
 			Response res = mksCmdRunner.execute(cmd);
@@ -835,12 +969,24 @@ public class MKSCommand {
 		Command cmd = new Command("tm", "editresult");
 		cmd.addOption(new Option("sessionID",sessionID));
 		cmd.addOption(new Option("Verdict",verdict));
-		cmd.addOption(new Option("Annotation",annotation));
-		cmd.addOption(new Option("field","Observed Result="+observedResult));
-		cmd.addOption(new Option("field","Result Serverity="+serverity));
-		cmd.addOption(new Option("field","Reproducibility="+reproducibility));
-		cmd.addOption(new Option("field","SW Version="+SWVersion));
-		cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		if (annotation != null && !annotation.equals("")){
+			cmd.addOption(new Option("annotation",annotation));
+		}
+		if (observedResult != null && !observedResult.equals("")){
+			cmd.addOption(new Option("field","Observed Result="+observedResult));
+		}
+		if (serverity != null && !serverity.equals("")){
+			cmd.addOption(new Option("field","Result Serverity="+serverity));
+		}
+		if (reproducibility != null && !reproducibility.equals("")){
+			cmd.addOption(new Option("field","Result Serverity="+reproducibility));
+		}
+		if (SWVersion != null && !SWVersion.equals("")){
+			cmd.addOption(new Option("field","SW Version="+SWVersion));
+		}
+		if (HWVerdion != null && !HWVerdion.equals("")){
+			cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		}
 		cmd.addSelection(caseID);
 		try{
 			Response res = mksCmdRunner.execute(cmd);

@@ -420,6 +420,7 @@ public class ImportApplicationUI extends JFrame {
 			helloText.setForeground(Color.BLACK);
 			logger.info("Success to parse excel: " + data);
 		} catch (Exception e1) {
+			e1.printStackTrace();
 			logger.error("Failed to parse excel!");
 			JOptionPane.showMessageDialog(contentPane, e1.getMessage(), "Failed to parse excel",
 					JOptionPane.ERROR_MESSAGE);

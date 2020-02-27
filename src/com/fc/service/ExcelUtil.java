@@ -93,7 +93,7 @@ public class ExcelUtil {
 	private static final String SESSIONN_STATE = "In Testing";
 	private static final String ExpectedResults = "Expected Results";
 
-	private static final String SESSION_ID = "sessionID";
+	private static final String SESSION_ID = "Session ID";
 	private static final String VERDICT = "Verdict";
 	private static final String OBSERVED_RESULT = "Observed Result";
 	private static final String ANNOTATION = "Annotation";
@@ -891,11 +891,12 @@ public class ExcelUtil {
 																		// USER_FULLNAME_RECORD
 		Map<String, Object> newMap = null;
 		StringBuffer allMessage = new StringBuffer();
-		int j = 1;//test result循环下标
+		int j = 1;// test result循环下标
 		List<String> sessionIds = null;
-		Map<String,String> sessionInfo = new HashMap<>();//只获取系统当前Session的信息。
-		Map<String,String> testsRecords = new HashMap<>();
-		Map<String,String> sysTestIdsMap = new HashMap<>();;
+		Map<String, List<String>> sessionInfoRecord = new HashMap<>();// 只获取系统当前Session的信息。
+		Map<String, String> testsRecords = new HashMap<>();
+		Map<String, String> sysTestIdsMap = new HashMap<>();
+		;
 		for (int i = 0; i < data.size(); i++) {
 			boolean hasError = false;// 校验出错误
 			StringBuffer errorMessage = new StringBuffer();
@@ -911,7 +912,9 @@ public class ExcelUtil {
 					String field = fieldConfig.get("field");
 					String value = (String) rowMap.get(header);
 					if (!"-".equals(field) && value != null && !"".equals(value)) {
-						String message = checkFieldValue(header, field, value, cmd);// 校验Test															// Case字段值
+						String message = checkFieldValue(header, field, value, cmd);// 校验Test
+																					// //
+																					// Case字段值
 						if (message == null || "".equals(message)) {
 							// 在此已经判断用户是否存在 ， 若存在 IS_USER 标识为 ture , 若不存在为 false
 							if (IS_USER) {
@@ -978,8 +981,9 @@ public class ExcelUtil {
 						Map<String, Map<String, String>> mapRecord = new HashMap<String, Map<String, String>>();
 						Map<String, String> stepMap = null;
 						String parentRecord = null;
-						for (int index=0; index<currentSteps.size(); index++) {// 循环处理Test	 Step信息
-							Map<String, String> map = currentSteps.get(index);			
+						for (int index = 0; index < currentSteps.size(); index++) {// 循环处理Test
+																					// Step信息
+							Map<String, String> map = currentSteps.get(index);
 							String acturalField = null;
 							boolean existMap = false;
 							String parentField = map.get("ParentField");
@@ -1007,8 +1011,9 @@ public class ExcelUtil {
 												}
 											} else {
 												Map<String, String> tempMap = mapRecord.get(value + "_" + index);
-												if(tempMap == null && parentRecord !=null && !parentField.equals(parentRecord)){
-													tempMap = mapRecord.get(value + "_" + (index-1));
+												if (tempMap == null && parentRecord != null
+														&& !parentField.equals(parentRecord)) {
+													tempMap = mapRecord.get(value + "_" + (index - 1));
 												}
 												if (tempMap != null) {
 													if ((parentField != null && !"".equals(parentField)
@@ -1065,52 +1070,64 @@ public class ExcelUtil {
 				}
 			}
 			// 02/11
-			if (rowMap.containsKey(TEST_RESULT)){//Test Case包含有 Test Result信息
+			if (rowMap.containsKey(TEST_RESULT)) {// Test Case包含有 Test Result信息
 				Object results = rowMap.get(TEST_RESULT);
-				if (results instanceof List){
-				   List<Map<String,String>> currentResults =(List<Map<String,String>>) results;
-				   if(!currentResults.isEmpty()){
-				   	   for(Map<String,String> map :currentResults) {//循环校验Test Result信息
-						   String sessionId = map.get(SESSION_ID);
-						   if (sessionId == null || sessionId.equals(""))//对sessionId做校验
-							   allMessage.append("line " + (i + 3) + "Session ID is Empty for Import Test Result! \n");
-						   if (sessionInfo.size() == 0) {//只有当size为0时，才去系统查询，避免每次循环都要查询
-							   sessionIds = new ArrayList<>();
-							   sessionIds.add(sessionId);
-							   //根据sessionID获取session信息
-							   sessionInfo = cmd.getItemByIds(sessionIds, Arrays.asList("ID", "Tests", "State")).get(0);
-						   }
-						   if (sessionInfo.size() != 0) {
-							   //02/18
-							   String sysTestsId = sessionInfo.get("Tests");//从系统中获取到的suite id，格式为"12230,13214,19223"，不可用contains("1223")方法
-							   String[] sysTestsIdArr = sysTestsId.split(",");
-							   if (sysTestIdsMap.size() == 0){//第一次进入循环时给sysTestIdsMap赋值，避免后面重复迭代赋值
-								   for (String caseId : sysTestsIdArr) {
-									   sysTestIdsMap.put(caseId, caseId);
-								   }
-							   }
-							   testsRecords = cmd.getItemByIds(Arrays.asList(sysTestsIdArr), Arrays.asList("Type")).get(0);
-							   String testType = testsRecords.get("Type");
-							 //  String[] typeArr = testType.split(",");//对testType不做拆分
-							   if (testType.equals("Test Case")) {
-								   if (!caseID.equals(sysTestIdsMap.get(caseID))) {
-									   allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session与当前测试用例未建立关联关系！ \n");
-								   }
-							   }else{//testType为Test Suite
-								     allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session与当前测试用例未建立关联关系！ \n");
-							   }
-						   }else{
-						   		allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session ID不正确，未查询到对应信息！ \n");
-						   }
-						   j++;
-				   	   }
-						newMap.put(TEST_RESULT,currentResults);
-				   }
+				if (results instanceof List) {
+					List<Map<String, String>> currentResults = (List<Map<String, String>>) results;
+					if (!currentResults.isEmpty()) {
+						for (Map<String, String> map : currentResults) {// 循环校验Test
+																		// Result信息
+							String sessionId = map.get(SESSION_ID);
+							if (sessionId == null || sessionId.equals(""))// 对sessionId做校验
+								allMessage.append("line " + (i + 3) + "Session ID is Empty for Import Test Result! \n");
+							List<String> caseList = sessionInfoRecord.get(sessionId);
+							if (caseList == null) {// 当前Session未查询时，查询Session信息
+								sessionIds = new ArrayList<>();
+								sessionIds.add(sessionId);
+								// 根据sessionID获取session信息
+								Map<String, String> sessionInfo = cmd
+										.getItemByIds(sessionIds, Arrays.asList("ID", "Tests", "State")).get(0);
+								String sysTestsId = sessionInfo.get("Tests");// 从系统中获取到的suite
+								caseList = new ArrayList<>();
+								if (sysTestsId != null && !"".equals(sysTestsId)) {
+									String[] sysTestsIdArr = sysTestsId.split(",");
+									List<Map<String, String>> testsList = cmd.findItemsByIDs(Arrays.asList(sysTestsIdArr),
+											Arrays.asList("ID,Type"));
+									for (Map<String, String> testMap : testsList) {
+										String type = testMap.get("Type");
+										String ID = testMap.get("ID");
+										if ("Test Case".equals(type)) {
+											caseList.add(ID);
+										} else {
+											List<String> allContains = cmd.allContents(ID);
+											if(allContains.size()>0){
+												caseList.addAll(allContains);
+											}
+										}
+									}
+								}
+								sessionInfoRecord.put(sessionId, caseList);
+							}
+							if (caseList != null) {
+								// 02/18
+								if (!caseList.contains(caseID)) {
+									allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮"
+											+ "Test Session与当前测试用例未建立关联关系！ \n");
+								}
+							} else {
+								allMessage.append(
+										"第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session ID不正确，未查询到对应信息！ \n");
+							}
+						}
+						j++;
+						newMap.put(TEST_RESULT, currentResults);
+					}
 				}
 			}
 			resultData.add(newMap);
 		}
-		allMessage.append(cmd.checkIssueType(sessionIds,TEST_SESSION, SESSIONN_STATE));//校验test session的状态
+		allMessage.append(cmd.checkIssueType(sessionIds, TEST_SESSION, SESSIONN_STATE));// 校验test
+																						// session的状态
 		errorRecord.put("error", allMessage.toString());
 		ImportApplicationUI.logger.info("End Deal Excel Data , all Data size is :" + resultData.size());
 		return resultData;
@@ -1158,14 +1175,6 @@ public class ExcelUtil {
 		}
 		Map<String, String> structureRecord = new HashMap<String, String>();
 		// int sheetNum = 1;
-
-		// 得到解析后的数据, 并处理得到Parent ID
-		// TestCaseImport.logger.info("Start to deal sheet : 1" );
-		// List<Map<String, Object>> dealData = this.dealExcelData(list,
-		// importType);
-		// this.dealCaseOrder(dealData);
-		// TestCaseImport.logger.info("Success to deal sheet : " +
-		// (data.indexOf(list) + 1) + ", data : " + dealData);
 
 		// 得到Project
 		if (!createTest) {
