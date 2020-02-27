@@ -1,4 +1,4 @@
-package com.gw.util;
+package com.fc.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,9 +11,11 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import com.fc.service.ExcelUtil;
+import com.fc.ui.ImportApplicationUI;
+
 import org.apache.log4j.Logger;
 
-import com.gw.service.ExcelUtil;
 import com.mks.api.CmdRunner;
 import com.mks.api.Command;
 import com.mks.api.IntegrationPoint;
@@ -533,6 +535,27 @@ public class MKSCommand {
 			throw e;
 		}
 	}
+
+
+/*	public boolean viewIssue(String id) throws APIException{
+		Command cmd = new Command("im", "viewissue");
+		cmd.addSelection(id);
+		try {
+			Response res = mksCmdRunner.execute(cmd);
+			boolean result = false;
+			WorkItemIterator it = res.getWorkItems();
+			while (it.hasNext()) {
+				WorkItem wi = it.next();
+				if(wi.getDisplayId().equals(project)){
+					result = true;
+				}
+			}
+			return result;
+		} catch (APIException e) {
+			logger.error(e.getMessage());
+			throw e;
+		}
+	}*/
 	
 	
 	/**
@@ -606,7 +629,7 @@ public class MKSCommand {
 	
 	/**
 	 * Description 获取所有user
-	 * @param field value
+//	 * @param field value
 	 * @return
 	 * @throws APIException
 	 */
@@ -710,4 +733,157 @@ public class MKSCommand {
 		}
 		return allCategories;
 	}
+
+	/**
+	 * Description 校验类型、状态是否正确
+	 * @return
+	 * @throws APIException
+	 */
+	public String checkIssueType(List<String> ids, String type, String checkState) throws APIException{
+		if(ids == null || ids.isEmpty())
+			return "";
+		Command cmd = new Command("im", "issues");
+		cmd.addOption(new Option("fields","Type,ID,State"));
+		SelectionList list = new SelectionList();
+		for(String id : ids){
+			list.add(id);
+		}
+		cmd.setSelectionList(list);
+		Response res = mksCmdRunner.execute(cmd);
+		StringBuffer typeErrorMessage = new StringBuffer("");
+		StringBuffer stateErrorMessage = new StringBuffer("");
+		boolean typeError = false;
+		boolean stateError = false;
+		if (res != null) {
+			WorkItemIterator it = res.getWorkItems();
+			while (it.hasNext()) {
+				WorkItem wi = it.next();
+				String actualType = wi.getField("Type").getValueAsString();
+				String actualState = wi.getField("State").getValueAsString();
+				String id = wi.getId();
+				if(!actualType.equals(type)){
+					typeErrorMessage.append(id + ";");
+					typeError = true;
+				}else if(!actualState.equals(checkState)){
+					stateErrorMessage.append(id + ";");
+					stateError = true;
+				}
+			}
+		}
+		if(typeError)
+			typeErrorMessage.append(" is not [ " + type + " ] Type. Please check it. \n");
+		if(stateError)
+			stateErrorMessage.append("is not in [" + checkState + " ] state. Please Check it");
+		return typeErrorMessage.toString() + stateErrorMessage.toString();
+	}
+
+	/**
+	 * 创建测试结果
+	 * 02/19
+	 * @param sessionID
+	 * @param verdict
+	 * @param observedResult
+	 * @param annotation
+	 * @param serverity
+	 * @param reproducibility
+	 * @param SWVersion
+	 * @param HWVerdion
+	 * @param caseID
+	 * @return
+	 */
+	public boolean createResult(String sessionID,String verdict,String observedResult,String annotation,
+								String serverity,String reproducibility,String SWVersion,String HWVerdion,
+								String caseID){
+		Command cmd = new Command("tm", "createresult");
+		cmd.addOption(new Option("sessionID",sessionID));
+		cmd.addOption(new Option("Verdict",verdict));
+		if (annotation != null && !annotation.equals("")){
+			cmd.addOption(new Option("annotation",annotation));
+		}
+		cmd.addOption(new Option("field","Observed Result="+observedResult));
+		cmd.addOption(new Option("field","Result Serverity="+serverity));
+		cmd.addOption(new Option("field","Reproducibility="+reproducibility));
+		cmd.addOption(new Option("field","SW Version="+SWVersion));
+		cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		cmd.addSelection(caseID);
+		try{
+			Response res = mksCmdRunner.execute(cmd);
+		}catch(APIException e){
+			ImportApplicationUI.logger.error(APIExceptionUtil.getMsg(e));
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 编辑测试结果
+	 * 02/19
+	 * @param sessionID
+	 * @param verdict
+	 * @param observedResult
+	 * @param annotation
+	 * @param serverity
+	 * @param reproducibility
+	 * @param SWVersion
+	 * @param HWVerdion
+	 * @param caseID
+	 * @return
+	 */
+	public boolean editResult(String sessionID,String verdict,String observedResult,String annotation,
+							  String serverity,String reproducibility,String SWVersion,String HWVerdion,
+							  String caseID){
+		Command cmd = new Command("tm", "editresult");
+		cmd.addOption(new Option("sessionID",sessionID));
+		cmd.addOption(new Option("Verdict",verdict));
+		cmd.addOption(new Option("Annotation",annotation));
+		cmd.addOption(new Option("field","Observed Result="+observedResult));
+		cmd.addOption(new Option("field","Result Serverity="+serverity));
+		cmd.addOption(new Option("field","Reproducibility="+reproducibility));
+		cmd.addOption(new Option("field","SW Version="+SWVersion));
+		cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		cmd.addSelection(caseID);
+		try{
+			Response res = mksCmdRunner.execute(cmd);
+		}catch(APIException e){
+			ImportApplicationUI.logger.error(APIExceptionUtil.getMsg(e));
+			return false;
+		}
+		return true;
+	}
+
+	public List<Map<String, String>> getResult(String caseID) throws APIException {
+		List<Map<String, String>> result = null;
+		Command cmd = new Command("tm", "results");
+		cmd.addOption(new Option("caseID", caseID));
+		List<String> fields = new ArrayList<>();
+		fields.add("sessionID");
+		MultiValue mv = new MultiValue();
+		mv.setSeparator(",");
+		for (String field : fields) {
+			mv.add(field);
+		}
+		Option op = new Option("fields", mv);
+		cmd.addOption(op);
+		Response res = null;
+		try {
+			res = mksCmdRunner.execute(cmd);
+			WorkItemIterator wk = res.getWorkItems();
+			result = new ArrayList<>();
+			while (wk.hasNext()) {
+				Map<String, String> map = new HashMap<>();
+				WorkItem wi = wk.next();
+				for (String field : fields) {
+					String value = wi.getField(field).getValueAsString();
+					map.put(field, value);
+				}
+				result.add(map);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
+
 }

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fieldMapping>
-	<!-- 不同文档条目Category值配置-->
-	<depts name="DEPT">
-		<dept name="BMS" ></dept>
-	</depts>
-</fieldMapping>
-
-

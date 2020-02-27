@@ -7,25 +7,26 @@
 		<excelField  name="Req ID"  				type="Test Case"  			field="Validates"			/>
 		<excelField  name="Priority"  				type="Test Case"  			field="Priority"			/>
 		<excelField  name="Precondition"  			type="Test Case"  			field="Precondition"			/>
-		<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>
+		<!--<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>-->
 		<excelField  name="Test Case No."  			type="Test Case"  			field="Test Case No."		/>
-		<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>
-		<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"			/>
+		<!--<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>-->
+		<!--<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"			/>-->
 		<excelField  name="Test case description"  	type="Test Case"  			field="Text"				/>
 		<excelField  name="Test Step ID"  			type="Test Steps"  			field="ID"					/>
-		<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/><!-- 无法导出 -->
+		<!--<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>--><!-- 无法导出 -->
 		<excelField  name="Expected Results"  		type="Test Case"  			field="Expected Results"	/>
 		<excelField  name="Unit ID"  				type="Test Case"  			field="Unit ID"				/>
 		<excelField  name="Test Case NO."  			type="Test Case"  			field="Test Case NO.bms"				/>
 		<excelField  name="Test Step Description"  	type="Test Case"  			field="Test Step Description"				/>
 		<excelField  name="Pass Criterion"  		type="Test Case"  			field="Pass Criterion"				/>
 		<excelField  name="Detection Method"  		type="Test Case"  			field="Detection Methods"				/>
-		
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>
@@ -50,28 +51,31 @@
 		<excelField  name="Priority"  				type="Test Case"  			field="Priority"			/>
 		<excelField  name="Req.Input"  				type="Test Case"  			field="Req.Input"			/>
 		<excelField  name="Req.Output"  			type="Test Case"  			field="Req.Output"			/>
-		<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>
+		<!--<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>-->
 		<excelField  name="Test Case No."  			type="Test Case"  			field="Test Case No."		/>
-		<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>
-		<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"			/>
+		<!--<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>-->
+		<!--<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"			/>-->
 		<excelField  name="Test case description"  	type="Test Case"  			field="Text"				/>
 		<excelField  name="Expected Results"  		type="Test Case"  			field="Expected Results"	/>
-		<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>
+		<!--<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>-->
 		<excelField  name="Test Step ID"  			type="Test Step"  			field="ID"		  			titleColor="A"/>
 		<excelField  name="Source Filename"  		type="Test Step"  			field="Source Filename"		  parentField="Call Depth"	titleColor="C"/>
 		<excelField  name="Function"  				type="Test Step"  			field="Function"			  parentField="Call Depth"	titleColor="C"/>
 		<excelField  name="Input I/F &amp; Data"  	type="Test Step"  			field="Input I/F &amp; Data"  parentField="Call Depth"	titleColor="C"/>
 		<excelField  name="Time Constraint"  		type="Test Step"  			field="Time Constraint"		  parentField="Call Depth"	titleColor="C"/>
 		<excelField  name="Output I/F &amp; Data"  	type="Test Step"  			field="Output I/F &amp; Data" parentField="Call Depth"	titleColor="C"/>
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>
 		<excelField  name="Test Date"  				type="Test Result"  		field="Actual End Date"			/>
+
 		<excelField  name="System Engineer"  						type="Test Case"  		field="System Engineer"							onlyCreate="false"  overRide="false"  titleColor="B"/>
 		<excelField  name="System Engineer Review Result"  			type="Test Case"  		field="System Engineer Review Result"			onlyCreate="false"  overRide="true"/>
 		<excelField  name="Hardware Engineer"  						type="Test Case"  		field="Hardware Engineer"						onlyCreate="false"  overRide="false"  titleColor="B"/>
@@ -87,28 +91,28 @@
 	</importType>
 	<importType name="Software Qualification Test Specification" type="Test Suite" mergeStep="true" structure="false"><!-- Software Requirement Specification -->
 		<excelField  name="Test Case ID"  			type="Test Case"  			field="ID"					titleColor="A"/>
-		<excelField  name="Req ID"  				type="Test Case"  			field="Validates"			/>
+		<excelField  name="Req ID"  				type="Test Case"  			field="Req ID"			/>
 		<excelField  name="Priority"  				type="Test Case"  			field="Priority"			/>
-		<excelField  name="Req Context"  			type="Test Case"  			field="Req Context"			/>
+		<!--<excelField  name="Req Context"  			type="Test Case"  			field="Req Context"			/>-->
 		<excelField  name="Req.Input"  				type="Test Case"  			field="Req.Input"			/>
 		<excelField  name="Req.Output"  			type="Test Case"  			field="Req.Output"			/>
-		<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>
+		<!--<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>-->
 		<excelField  name="Test Case No."  			type="Test Case"  			field="Test Case No."		/>
-		<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>
-		<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"		/>
+		<!--<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>-->
+		<!--<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"		/>-->
 		<excelField  name="Test case description"  	type="Test Case"  			field="Text"				/>
-		<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>
+		<!--<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>-->
 		<excelField  name="Precondition"  			type="Test Case"  			field="Precondition"		/>
 		<excelField  name="Test Step ID"  			type="Test Case"  			field="Test Steps"			/>
 		<excelField  name="Test Procedure"  	    type="Test Step"  			field="Test Procedure" 	      titleColor="C"/>
 		<excelField  name="Expected Results"  		type="Test Case"  			field="Expected Results"	/>
-		
-		
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>
@@ -133,12 +137,12 @@
 		<excelField  name="Priority"  				type="Test Case"  			field="Priority"			/>
 		<excelField  name="Req.Input"  				type="Test Case"  			field="Req.Input"			/>
 		<excelField  name="Req.Output"  			type="Test Case"  			field="Req.Output"			/>
-		<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>
+		<!--<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>-->
 		<excelField  name="Test Case No."  			type="Test Case"  			field="Test Case No."		/>
-		<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>
-		<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"			/>
+			<!--<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>-->
+		<!--<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"			/>-->
 		<excelField  name="Test case description"  	type="Test Case"  			field="Text"				/>
-		<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>
+		<!--<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>-->
 		<excelField  name="Test Step ID"  			type="Test Step"  			field="ID"					titleColor="A"/>
 		<excelField  name="Function"  				type="Test Step"  			field="Function"			parentField="Test Input"	titleColor="C"/>
 		<excelField  name="H/W"  					type="Test Step"  			field="H/W"					parentField="Test Input"	titleColor="C"/>
@@ -149,16 +153,18 @@
 		<excelField  name="H/W"  					type="Test Step"  			field="H/W"					parentField="Test Output"	titleColor="C"/>
 		<excelField  name="Output I/F"  			type="Test Step"  			field="Output I/F"			parentField="Test Output"	titleColor="C"/>
 		<excelField  name="Expected Output Data"  			type="Test Step"  			field="Expected Output Data"			parentField="Test Output"	titleColor="C"/>
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>
 		<excelField  name="Test Date"  				type="Test Result"  		field="Actual End Date"			/>
-		
+
 		<excelField  name="System Engineer"  						type="Test Case"  		field="System Engineer"							onlyCreate="false"  overRide="false"	titleColor="B"/>
 		<excelField  name="System Engineer Review Result"  			type="Test Case"  		field="System Engineer Review Result"			onlyCreate="false"  overRide="true"/>
 		<excelField  name="Hardware Engineer"  						type="Test Case"  		field="Hardware Engineer"						onlyCreate="false"  overRide="false"	titleColor="B"/>
@@ -194,11 +200,13 @@
 		<excelField  name="H/W"  					type="Test Step"  			field="H/W"					parentField="Test Output"	titleColor="C"/>
 		<excelField  name="Output I/F"  			type="Test Step"  			field="Output I/F"			parentField="Test Output"	titleColor="C"/>
 		<excelField  name="Expected Output Data"  			type="Test Step"  			field="Expected Output Data"			parentField="Test Output"	titleColor="C"/>
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>
@@ -234,13 +242,13 @@
 		<excelField  name="Test Step ID"  			type="Test Case"  			field="Test Steps"			/>
 		<excelField  name="Test Procedure"  	    type="Test Step"  			field="Test Procedure" 	      titleColor="C"/>
 		<excelField  name="Expected Results"  		type="Test Case"  			field="Expected Results"	/>
-		
-		
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>
@@ -263,26 +271,26 @@
 		<excelField  name="Test Case ID"  			type="Test Case"  			field="ID"					titleColor="A"/>
 		<excelField  name="Req ID"  				type="Test Case"  			field="Validates"			/>
 		<excelField  name="Priority"  				type="Test Case"  			field="Priority"			/>
-		<excelField  name="Req Context"  			type="Test Case"  			field="Req Context"			/>
+		<!--<excelField  name="Req Context"  			type="Test Case"  			field="Req Context"			/>-->
 		<excelField  name="Req.Input"  				type="Test Case"  			field="Req.Input"			/>
 		<excelField  name="Req.Output"  			type="Test Case"  			field="Req.Output"			/>
 		<excelField  name="Req.Testability"  		type="Test Case"  			field="Req.Testability"		/>
 		<excelField  name="Test Case No."  			type="Test Case"  			field="Test Case No."		/>
-		<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>
-		<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"		/>
+		<!--<excelField  name="Test Case Source Type"  	type="Test Case"  			field="Test Case Source Type"		/>-->
+		<!--<excelField  name="Test Type"  				type="Test Case"  			field="Test Type BMS"		/>-->
 		<excelField  name="Test case description"  	type="Test Case"  			field="Text"				/>
-		<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>
+		<!--<excelField  name="Test Environment"  		type="Test Session"  		field="Test Environment"	/>-->
 		<excelField  name="Precondition"  			type="Test Case"  			field="Precondition"		/>
 		<excelField  name="Test Step ID"  			type="Test Case"  			field="Test Steps"			/>
 		<excelField  name="Test Procedure"  	    type="Test Step"  			field="Test Procedure" 	      titleColor="C"/>
 		<excelField  name="Expected Results"  		type="Test Case"  			field="Expected Results"	/>
-		
-		
+
+		<excelField name="Session ID" 				type="Test Result" 			field="sessionID"          />
 		<excelField  name="Verdict"  				type="Test Result"  		field="verdictType"				/>
 		<excelField  name="Observed Result"  		type="Test Result"  		field="Observed Result"		/>
 		<excelField  name="Annotation"  			type="Test Result"  		field="Annotation"				/>
 		<excelField  name="Serverity"  				type="Test Result"  		field="Result Serverity"			/>
-		<excelField  name="Reproducilibuty"  		type="Test Result"  		field="Reproducilibuty"			/>
+		<excelField  name="Reproducibility"  		type="Test Result"  		field="Reproducibility"			/>
 		<excelField  name="SW Version"  			type="Test Result"  		field="SW Version"			/>
 		<excelField  name="HW Version"  			type="Test Result"  		field="HW Result Version"			/>
 		<excelField  name="Tester"  				type="Test Result"  		field="Tester"				/>

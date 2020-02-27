@@ -1,17 +1,11 @@
-package com.gw.service;
+package com.fc.service;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,9 +23,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.gw.ui.TestCaseImport;
-import com.gw.util.ExceptionUtil;
-import com.gw.util.MKSCommand;
+import com.fc.ui.ImportApplicationUI;
+import com.fc.util.ExceptionUtil;
+import com.fc.util.MKSCommand;
 import com.mks.api.response.APIException;
 
 public class ExcelUtil {
@@ -47,7 +41,7 @@ public class ExcelUtil {
 	// private static Map<String, Map<String, String>> headerConfig = new
 	// HashMap<>();
 	private static Map<String, Map<String, Map<String, String>>> headerConfigs = new HashMap<>();
-	private static final String FIELD_CONFIG_FILE = "Mapping.xml";
+	private static final String FIELD_CONFIG_FILE = "FieldMapping.xml";
 	private static final String CATEGORY_CONFIG_FILE = "Category.xml";
 	private static final String TEST_STEP = "Test Step";
 	private static final String TEST_RESULT = "Test Result";
@@ -95,6 +89,20 @@ public class ExcelUtil {
 	public static final Logger logger = Logger.getLogger(ExcelUtil.class);
 	private boolean parentStructure = false;// 是否有父子级结构
 
+	private static final String TEST_SESSION = "Test Session";
+	private static final String SESSIONN_STATE = "In Testing";
+	private static final String ExpectedResults = "Expected Results";
+
+	private static final String SESSION_ID = "sessionID";
+	private static final String VERDICT = "Verdict";
+	private static final String OBSERVED_RESULT = "Observed Result";
+	private static final String ANNOTATION = "Annotation";
+	private static final String SERVERITY = "Serverity";
+	private static final String REPRODUCIBILITY = "Reproducibility";
+	private static final String SW_VERSION = "SW Version";
+	private static final String HW_VERSION = "HW Version";
+
+
 	/**
 	 * 利用Jsoup解析配置文件，得到相应的参数，为Type选项和创建Document提供信息 (1)
 	 * Document:Type,Project,State,Shared Category (2) Content:Type 负责人：汪巍
@@ -102,12 +110,11 @@ public class ExcelUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings({ "unused", "static-access" })
-	public List<String> parsFieldMapping(String dept, String selectImportType) throws Exception {
+	public List<String> parsFieldMapping(String selectImportType) throws Exception {
 
-		ExcelUtil.logger.info("start to parse xml : " + dept + FIELD_CONFIG_FILE);
+		ExcelUtil.logger.info("start to parse xml : " + FIELD_CONFIG_FILE);
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-				.parse(ExcelUtil.class.getClassLoader().getResourceAsStream(dept + FIELD_CONFIG_FILE));
+				.parse(ExcelUtil.class.getClassLoader().getResourceAsStream(FIELD_CONFIG_FILE));
 		Element root = doc.getDocumentElement();
 		List<String> typeList = new ArrayList<String>();
 		if (root == null)
@@ -238,9 +245,9 @@ public class ExcelUtil {
 	/**
 	 * 获得Excel中的数据
 	 * 
-	 * @param filePath
+	 * @param
 	 * @return
-	 * @throws BiffException
+	 * @throws
 	 * @throws IOException
 	 */
 	public List<Map<String, Object>> parseExcel(File file, String importType) throws Exception {
@@ -277,7 +284,9 @@ public class ExcelUtil {
 		for (; row < endRow; row++) {
 			Map<String, Object> map = new HashMap<>();
 			Map<String, String> stepMap = null;
+			Map<String,String> resultMap = null;
 			List<Map<String, String>> stepList = new ArrayList<Map<String, String>>();
+			List<Map<String,String>> resultList = new ArrayList<Map<String,String>>();
 			boolean stepField = false;
 			// case可关联多个Test Step信息，所以
 			Row dataRow = sheet.getRow(row);
@@ -285,15 +294,35 @@ public class ExcelUtil {
 			int stepFieldEnd = 0;
 			for (int col = 0; col < colNum; col++) {
 				Cell fieldCell = firstRow.getCell(col);
+				Cell secondCell = secondRow.getCell(col);
+				String secondFieldVal = getCellVal(secondCell);//获取列头的值(第2行)
+				Cell valueCell = dataRow.getCell(col);
+				String valueVal = getCellVal(valueCell);//获取列的值(数据行)
 				if (fieldCell == null && needSecond) {
 					fieldCell = secondRow.getCell(col);
 				}
 				String field = getCellVal(fieldCell);
 				if (stepField && stepFieldStart <= col && col <= stepFieldEnd) {
-					stepField = true;
+//					stepField = true;
 					fieldCell = secondRow.getCell(col);
-					field = getCellVal(fieldCell);
-				} else if (field.contains(TEST_RESULT_CYCLE)) {
+					field = getCellVal(fieldCell);//获取列头的值(第2行)
+				}else if ("".equals(secondFieldVal) || "-".equals(secondFieldVal)){//如果第二行为空，就是Test Case数据  // 02/12
+					Object value = map.get(field);
+					if(value == null || "".equals(value)){
+						map.put(field, valueVal);
+					}else if (ExpectedResults.equals(field)){//如果是Expected Results，合并值
+						String valueStr = (String) value;
+						valueStr = valueStr + "\n" + valueVal;
+					}
+				}else if(secondFieldVal != null && resultFields.contains(secondFieldVal)){//循环处理Test Result  //02/12
+					if(valueVal != null && !"".equals(valueVal)){
+						if(SESSION_ID.equals(secondFieldVal)){
+							resultMap = new HashMap<String,String>();
+							resultList.add(resultMap);
+						}
+						resultMap.put(secondFieldVal, valueVal);
+					}
+				}else if (field.contains(TEST_RESULT_CYCLE)) {
 					int fieldCol = fieldCell.getColumnIndex();
 					int fieldRow = fieldCell.getRowIndex();
 					CellRangeAddress cellRange = cellRangeMap.get(fieldRow + "-" + fieldCol);
@@ -324,24 +353,30 @@ public class ExcelUtil {
 					int fieldRow = fieldCell.getRowIndex();
 					CellRangeAddress cellRange = cellRangeMap.get(fieldRow + "-" + fieldCol);
 					fieldCell = secondRow.getCell(col);
-					stepFieldStart = cellRange.getFirstColumn();
-					stepFieldEnd = cellRange.getLastColumn();
+					stepFieldStart = cellRange.getFirstColumn();//Call Depth单元格的起始列号
+					stepFieldEnd = cellRange.getLastColumn();//Call Depth单元格的结束列号
 					field = getCellVal(fieldCell);
 					stepList.add(stepMap);
-					stepField = true;
+					stepField = true;//第一次赋true值的位置
 				} else {
 					stepField = false;
 				}
-				Cell valueCell = dataRow.getCell(col);
+
 				String value = valueCell != null ? getCellVal(valueCell) : "";
-				if (stepField || stepFields.contains(field)) {// Test Step 字段
+				if (stepField && stepFields.contains(field)) {// Test Step 字段  把当初的||改成了现在的&& 02/15
 					stepMap.put(field, value);
-				} else {// Test Case字段放入Map
-					map.put(field, value);
 				}
+				//02/15 存值冗余
+				/*else {// Test Case字段放入Map
+					map.put(field, value);
+				}*/
+
 			}
 			if (!stepList.isEmpty()) {
 				map.put(TEST_STEP, stepList);
+			}
+			if (!resultList.isEmpty()){
+				map.put(TEST_RESULT, resultList);
 			}
 			System.out.println("Test Case No." + map.get("Test Case No."));
 			list.add(map);
@@ -443,7 +478,7 @@ public class ExcelUtil {
 													if ((parentField != null && !"".equals(parentField)
 															&& !tempMap.containsKey(parentField))
 															|| (parentField == null || !"".equals(parentField)
-																	&& !tempMap.containsKey(field))) {
+															&& !tempMap.containsKey(field))) {
 														stepMap = tempMap;
 														existMap = true;
 													}
@@ -496,6 +531,36 @@ public class ExcelUtil {
 						newMap.put("Test Steps", stepIds);
 					}
 				}
+			}else if (rowMap.containsKey(TEST_RESULT)){//Test Case包含有 Test Result信息  // 02/12
+				Object steps = rowMap.get(TEST_RESULT);
+				if(steps instanceof List){
+					List<Map<String, String>> currentResults = (List<Map<String, String>> )steps;
+					if(!currentResults.isEmpty()) {//Test Case包含有 Test Result信息
+						List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
+						Map<String,String> resultMap = null;
+						boolean hasVal = false;
+						for(Map<String, String> map : currentResults) {//循环处理Test Result信息
+							hasVal = false;
+							resultMap = new HashMap<String,String>();
+							for(String header : resultFields) {
+								if(map.containsKey(header)){
+									Map<String, String> fieldConfig = headerConfig.get(header);
+									if(fieldConfig != null) {
+										String field = fieldConfig.get("field");
+										String value = (String)map.get(header);
+										if(value != null && !"".equals(value)) {
+											resultMap.put(field, value);//存放非拼接字段
+											hasVal = true;
+										}
+									}
+								}
+							}
+							if(hasVal)
+								resultList.add(resultMap);
+						}
+						newMap.put(TEST_RESULT, resultList);
+					}
+				}
 			}
 			newData.add(newMap);
 		}
@@ -507,7 +572,7 @@ public class ExcelUtil {
 	 * <li>根据Test Case ID，整行数据确定真正的行数</li>
 	 * 
 	 * @param sheet
-	 * @param field
+	 * @param
 	 * @return
 	 */
 	public int getRealRowNum(Sheet sheet, String importType) throws Exception {
@@ -801,7 +866,7 @@ public class ExcelUtil {
 			String importType, MKSCommand cmd) throws Exception {
 		Map<String, Map<String, String>> headerConfig = headerConfigs.get(importType);
 		List<Map<String, Object>> resultData = new ArrayList<Map<String, Object>>();
-		TestCaseImport.logger.info("Begin Deal Excel Data ,Data size is :" + data.size());
+		ImportApplicationUI.logger.info("Begin Deal Excel Data ,Data size is :" + data.size());
 		if (FIELD_TYPE_RECORD == null || FIELD_TYPE_RECORD.isEmpty()) {
 			/** 查询Field ，为Field校验做准备 */
 			List<String> importFields = new ArrayList<String>();
@@ -826,6 +891,11 @@ public class ExcelUtil {
 																		// USER_FULLNAME_RECORD
 		Map<String, Object> newMap = null;
 		StringBuffer allMessage = new StringBuffer();
+		int j = 1;//test result循环下标
+		List<String> sessionIds = null;
+		Map<String,String> sessionInfo = new HashMap<>();//只获取系统当前Session的信息。
+		Map<String,String> testsRecords = new HashMap<>();
+		Map<String,String> sysTestIdsMap = new HashMap<>();;
 		for (int i = 0; i < data.size(); i++) {
 			boolean hasError = false;// 校验出错误
 			StringBuffer errorMessage = new StringBuffer();
@@ -887,7 +957,6 @@ public class ExcelUtil {
 							} else {
 								newMap.put(field, value);
 							}
-
 						} else {
 							errorMessage.append("line " + (i + 3) + ": ").append(message).append("\n");
 							hasError = true;
@@ -995,10 +1064,55 @@ public class ExcelUtil {
 					}
 				}
 			}
+			// 02/11
+			if (rowMap.containsKey(TEST_RESULT)){//Test Case包含有 Test Result信息
+				Object results = rowMap.get(TEST_RESULT);
+				if (results instanceof List){
+				   List<Map<String,String>> currentResults =(List<Map<String,String>>) results;
+				   if(!currentResults.isEmpty()){
+				   	   for(Map<String,String> map :currentResults) {//循环校验Test Result信息
+						   String sessionId = map.get(SESSION_ID);
+						   if (sessionId == null || sessionId.equals(""))//对sessionId做校验
+							   allMessage.append("line " + (i + 3) + "Session ID is Empty for Import Test Result! \n");
+						   if (sessionInfo.size() == 0) {//只有当size为0时，才去系统查询，避免每次循环都要查询
+							   sessionIds = new ArrayList<>();
+							   sessionIds.add(sessionId);
+							   //根据sessionID获取session信息
+							   sessionInfo = cmd.getItemByIds(sessionIds, Arrays.asList("ID", "Tests", "State")).get(0);
+						   }
+						   if (sessionInfo.size() != 0) {
+							   //02/18
+							   String sysTestsId = sessionInfo.get("Tests");//从系统中获取到的suite id，格式为"12230,13214,19223"，不可用contains("1223")方法
+							   String[] sysTestsIdArr = sysTestsId.split(",");
+							   if (sysTestIdsMap.size() == 0){//第一次进入循环时给sysTestIdsMap赋值，避免后面重复迭代赋值
+								   for (String caseId : sysTestsIdArr) {
+									   sysTestIdsMap.put(caseId, caseId);
+								   }
+							   }
+							   testsRecords = cmd.getItemByIds(Arrays.asList(sysTestsIdArr), Arrays.asList("Type")).get(0);
+							   String testType = testsRecords.get("Type");
+							 //  String[] typeArr = testType.split(",");//对testType不做拆分
+							   if (testType.equals("Test Case")) {
+								   if (!caseID.equals(sysTestIdsMap.get(caseID))) {
+									   allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session与当前测试用例未建立关联关系！ \n");
+								   }
+							   }else{//testType为Test Suite
+								     allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session与当前测试用例未建立关联关系！ \n");
+							   }
+						   }else{
+						   		allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session ID不正确，未查询到对应信息！ \n");
+						   }
+						   j++;
+				   	   }
+						newMap.put(TEST_RESULT,currentResults);
+				   }
+				}
+			}
 			resultData.add(newMap);
 		}
+		allMessage.append(cmd.checkIssueType(sessionIds,TEST_SESSION, SESSIONN_STATE));//校验test session的状态
 		errorRecord.put("error", allMessage.toString());
-		TestCaseImport.logger.info("End Deal Excel Data , all Data size is :" + resultData.size());
+		ImportApplicationUI.logger.info("End Deal Excel Data , all Data size is :" + resultData.size());
 		return resultData;
 	}
 
@@ -1013,6 +1127,7 @@ public class ExcelUtil {
 	 * @param testSuiteID
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public void startImport(List<Map<String, Object>> data, MKSCommand cmd, String importType, String shortTitle,
 			String project, String testSuiteID) throws Exception {
 		// 删除Token
@@ -1056,7 +1171,7 @@ public class ExcelUtil {
 		if (!createTest) {
 			project = cmd.getItemByIds(Arrays.asList(testSuiteID), Arrays.asList("Project")).get(0).get("Project");
 		}
-		TestCaseImport.logger.info("Project for sheet 1 " + " is : " + project);
+		ImportApplicationUI.logger.info("Project for sheet 1 " + " is : " + project);
 
 		// 将解析后的数据进行导入，因为不涉及结构，因此一条导入不成功，后续仍可导入
 		String parentId = testSuiteID;// 涉及
@@ -1064,7 +1179,7 @@ public class ExcelUtil {
 			return;
 		}
 		int totalCaseNum = data.size();
-		TestCaseImport.logger.info("Start Import Excel Data , all Data size is :" + totalCaseNum);
+		ImportApplicationUI.logger.info("Start Import Excel Data , all Data size is :" + totalCaseNum);
 		for (int index = 0; index < totalCaseNum; index++) {
 			Map<String, Object> testCaseData = data.get(index);
 			logger.info("Now Deal row " + index + " data");
@@ -1074,9 +1189,9 @@ public class ExcelUtil {
 				caseId = testCaseData.get("ID").toString();
 			}
 			if (caseId == null || "".equals(caseId)) {
-				TestCaseImport.showLogger(" \tStart to Create " + importType);
+				ImportApplicationUI.showLogger(" \tStart to Create " + importType);
 			} else {
-				TestCaseImport.showLogger(" \tStart to deal " + importType + "  : " + caseId);
+				ImportApplicationUI.showLogger(" \tStart to deal " + importType + "  : " + caseId);
 			}
 			Map<String, String> newTestCaseData = new HashMap<>();
 			List<String> newRelatedStepIds = new ArrayList<>();
@@ -1087,7 +1202,12 @@ public class ExcelUtil {
 						stepCreateF, stepUpdate, stepUpdateF);
 				hasStep = true;
 			}
-
+			// 把Test Result信息获取出来
+			List<Map<String,String>> resultList = null;
+			if(testCaseData.get(TEST_RESULT) != null ){
+				resultList = (List<Map<String,String>>)testCaseData.get(TEST_RESULT);
+				testCaseData.remove(TEST_RESULT);
+			}
 			// 2. 再处理Test Case的信息(更新或创建，不包括创建)
 			String beforeId = null;// 涉及结构
 			String strucetureVal = null;
@@ -1103,8 +1223,7 @@ public class ExcelUtil {
 				}
 			}
 			if (parentStructure && caseFields.contains("Parent") && parentId == null) {
-				throw new Exception(" ID [" + testSuiteID + "] dept is " + TestCaseImport.DEPT
-						+ ", need Hierarchical relationship ,Need to have a P-level " + importType);
+				throw new Exception("Need to have a P-level " + importType);
 			}
 			caseId = this.getTestCase(parentId, newTestCaseData, testCaseData, project, cmd, caseId, beforeId,
 					caseCreate, caseCreateF, caseUpdate, caseUpdateF, importType);
@@ -1117,19 +1236,21 @@ public class ExcelUtil {
 			if (parentStructure) {
 				structureRecord.put(strucetureVal, caseId);
 			}
+			// 5. 导入测试结果
+			dealTestResults(resultList, cmd, caseId);
 
-			TestCaseImport.showProgress(1, 1, caseNum, totalCaseNum);
+			ImportApplicationUI.showProgress(1, 1, caseNum, totalCaseNum);
 		}
-		TestCaseImport.showLogger("End to deal " + importType + " : " + testSuiteID);
-		TestCaseImport.showLogger("==============================================");
-		TestCaseImport.showLogger("Create " + CONTENT_TYPE + ": success (" + caseCreate.size() + "," + caseCreate
+		ImportApplicationUI.showLogger("End to deal " + importType + " : " + testSuiteID);
+		ImportApplicationUI.showLogger("==============================================");
+		ImportApplicationUI.showLogger("Create " + CONTENT_TYPE + ": success (" + caseCreate.size() + "," + caseCreate
 				+ "), failed (" + caseCreateF.size() + ")");
-		TestCaseImport.showLogger("Update " + CONTENT_TYPE + ": success (" + caseUpdate.size() + "," + caseUpdate
+		ImportApplicationUI.showLogger("Update " + CONTENT_TYPE + ": success (" + caseUpdate.size() + "," + caseUpdate
 				+ "), failed (" + caseUpdateF.size() + "," + caseUpdateF + ")");
 		if (hasStep) {
-			TestCaseImport.showLogger("Create Test Step: success (" + stepCreate.size() + "," + stepCreate
+			ImportApplicationUI.showLogger("Create Test Step: success (" + stepCreate.size() + "," + stepCreate
 					+ "), failed (" + stepCreateF.size() + ")");
-			TestCaseImport.showLogger("Update Test Step: success (" + stepUpdate.size() + "," + stepUpdate
+			ImportApplicationUI.showLogger("Update Test Step: success (" + stepUpdate.size() + "," + stepUpdate
 					+ "), failed (" + stepUpdateF.size() + "," + stepUpdateF + ")");
 		}
 	}
@@ -1173,8 +1294,8 @@ public class ExcelUtil {
 	/**
 	 * 创建或更新Test Case
 	 * 
-	 * @param documentId
-	 *            Suite ID
+	 * @param
+	 *
 	 * @param newTestCaseData
 	 *            新的Case信息集合
 	 * @param caseMap
@@ -1248,10 +1369,10 @@ public class ExcelUtil {
 				newTestCaseData.put("State", "Active");
 				caseId = cmd.createContent(parentId, newTestCaseData, CONTENT_TYPE, beforeId);
 				caseCreate.add(caseId);
-				TestCaseImport.showLogger(" \tSuccess to create " + CONTENT_TYPE + " : " + caseId);
+				ImportApplicationUI.showLogger(" \tSuccess to create " + CONTENT_TYPE + " : " + caseId);
 			} catch (APIException e) {
 				caseCreateF.add(caseId);
-				TestCaseImport.showLogger(" \tFailed to create " + CONTENT_TYPE + " : " + caseId);
+				ImportApplicationUI.showLogger(" \tFailed to create " + CONTENT_TYPE + " : " + caseId);
 				logger.error("Failed to create test case : " + ExceptionUtil.catchException(e));
 			}
 		} else {
@@ -1289,10 +1410,10 @@ public class ExcelUtil {
 				if (parentStructure && beforeId != null && !"".equals(beforeId)) {
 					cmd.moveContent(parentId, beforeId, caseId);
 				}
-				TestCaseImport.showLogger(" \tSuccess to update Test Case : " + caseId);
+				ImportApplicationUI.showLogger(" \tSuccess to update Test Case : " + caseId);
 			} catch (APIException e) {
 				caseUpdateF.add(caseId);
-				TestCaseImport.showLogger(" \tFailed to update Test Case : " + caseId);
+				ImportApplicationUI.showLogger(" \tFailed to update Test Case : " + caseId);
 				logger.error("Failed to edit test case : " + ExceptionUtil.catchException(e));
 			}
 		}
@@ -1345,7 +1466,7 @@ public class ExcelUtil {
 		List<Map<String, String>> testStepData = (List<Map<String, String>>) caseMap.get(TEST_STEP);
 		int i = 1;
 		if (testStepData != null && testStepData.size() > 0) {
-			TestCaseImport.showLogger(" \t\tHas Test Step size  : " + testStepData.size());
+			ImportApplicationUI.showLogger(" \t\tHas Test Step size  : " + testStepData.size());
 			for (Map<String, String> stepMap : testStepData) {
 				// if (i == 1) {// 将第一步的Test Step的Precondition加入到Test Case中
 				// newTestCaseData.put(INITIAL_STATE_PRECODITION,
@@ -1366,20 +1487,20 @@ public class ExcelUtil {
 						stepMap.put("Project", project);
 						stepId = cmd.createIssue(TEST_STEP, stepMap, null);
 						stepCreate.add(stepId);
-						TestCaseImport.showLogger(" \t\tSuccess to create Test Step " + i + ", " + stepId);
+						ImportApplicationUI.showLogger(" \t\tSuccess to create Test Step " + i + ", " + stepId);
 					} catch (APIException e) {
 						stepCreateF.add(stepId);
-						TestCaseImport.showLogger(" \t\tFailed to create Test Step");
+						ImportApplicationUI.showLogger(" \t\tFailed to create Test Step");
 						logger.error("Failed to create test step : " + ExceptionUtil.catchException(e));
 					}
 				} else {
 					try {
 						cmd.editissue(stepId, stepMap);
 						stepUpdate.add(stepId);
-						TestCaseImport.showLogger(" \t\tSuccess to update Test Step " + i + ", " + stepId);
+						ImportApplicationUI.showLogger(" \t\tSuccess to update Test Step " + i + ", " + stepId);
 					} catch (APIException e) {
 						stepUpdateF.add(stepId);
-						TestCaseImport.showLogger(" \t\tFailed to update Test Step " + i + ", " + stepId);
+						ImportApplicationUI.showLogger(" \t\tFailed to update Test Step " + i + ", " + stepId);
 						logger.error("Failed to edit test step : " + ExceptionUtil.catchException(e));
 					}
 				}
@@ -1388,5 +1509,40 @@ public class ExcelUtil {
 			}
 		}
 	}
+
+	/**
+	 * 处理测试结果
+	 * @param resultDatas
+	 * @param cmd
+	 * @param caseID
+	 */
+	public void dealTestResults(List<Map<String, String>> resultDatas, MKSCommand cmd, String caseID) throws APIException {
+		if (resultDatas != null && !resultDatas.isEmpty()) {
+			List<Map<String, String>> caseResult = cmd.getResult(caseID);
+			Map<String,Map<String,String>> resultRecord = new HashMap<String,Map<String,String>>();
+			if (caseResult != null && !caseResult.isEmpty()){
+				for (Map<String, String> map : caseResult){
+					resultRecord.put(map.get("sessionID"),map);
+				}
+			}
+			for (Map<String, String> result : resultDatas) {
+				String sessionId = result.get(SESSION_ID);
+				String verdict = result.get(VERDICT);
+				String observedResult = result.get(OBSERVED_RESULT);
+				String annotation = result.get(ANNOTATION);
+				String serverity = result.get(SERVERITY);
+				String reproducibility = result.get(REPRODUCIBILITY);
+				String SWVersion = result.get(SW_VERSION);
+				String HWVerdion = result.get(HW_VERSION);
+				if (resultRecord.get(sessionId) == null){//如果查到系统当前的test result为空，则把excel模板中读取到的test result数据导入 02/19
+					cmd.createResult(sessionId,verdict,observedResult,annotation,serverity,reproducibility,SWVersion,HWVerdion,caseID);
+				}else{//更新系统当前的test result
+					cmd.editResult(sessionId,verdict,observedResult,annotation,serverity,reproducibility,SWVersion,HWVerdion,caseID);
+				}
+			}
+		}
+	}
+
+
 
 }
