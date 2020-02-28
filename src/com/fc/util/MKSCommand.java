@@ -915,29 +915,16 @@ public class MKSCommand {
 	 * @param caseID
 	 * @return
 	 */
-	public boolean createResult(String sessionID,String verdict,String observedResult,String annotation,
-								String serverity,String reproducibility,String SWVersion,String HWVerdion,
-								String caseID){
+	public boolean createResult(String sessionID,String verdict,String annotation,
+								String caseID, Map<String, String> fieldValues){
 		Command cmd = new Command("tm", "createresult");
 		cmd.addOption(new Option("sessionID",sessionID));
 		cmd.addOption(new Option("Verdict",verdict));
 		if (annotation != null && !annotation.equals("")){
 			cmd.addOption(new Option("annotation",annotation));
 		}
-		if (observedResult != null && !observedResult.equals("")){
-			cmd.addOption(new Option("field","Observed Result="+observedResult));
-		}
-		if (serverity != null && !serverity.equals("")){
-			cmd.addOption(new Option("field","Result Serverity="+serverity));
-		}
-		if (reproducibility != null && !reproducibility.equals("")){
-			cmd.addOption(new Option("field","Result Serverity="+reproducibility));
-		}
-		if (SWVersion != null && !SWVersion.equals("")){
-			cmd.addOption(new Option("field","SW Version="+SWVersion));
-		}
-		if (HWVerdion != null && !HWVerdion.equals("")){
-			cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		for(String field : fieldValues.keySet()){
+			cmd.addOption(new Option("field",field + "=" + fieldValues.get(field)));
 		}
 		cmd.addSelection(caseID);
 		try{
@@ -963,29 +950,16 @@ public class MKSCommand {
 	 * @param caseID
 	 * @return
 	 */
-	public boolean editResult(String sessionID,String verdict,String observedResult,String annotation,
-							  String serverity,String reproducibility,String SWVersion,String HWVerdion,
-							  String caseID){
+	public boolean editResult(String sessionID,String verdict,String annotation,
+							  String caseID, Map<String, String> fieldValues){
 		Command cmd = new Command("tm", "editresult");
 		cmd.addOption(new Option("sessionID",sessionID));
 		cmd.addOption(new Option("Verdict",verdict));
 		if (annotation != null && !annotation.equals("")){
 			cmd.addOption(new Option("annotation",annotation));
 		}
-		if (observedResult != null && !observedResult.equals("")){
-			cmd.addOption(new Option("field","Observed Result="+observedResult));
-		}
-		if (serverity != null && !serverity.equals("")){
-			cmd.addOption(new Option("field","Result Serverity="+serverity));
-		}
-		if (reproducibility != null && !reproducibility.equals("")){
-			cmd.addOption(new Option("field","Result Serverity="+reproducibility));
-		}
-		if (SWVersion != null && !SWVersion.equals("")){
-			cmd.addOption(new Option("field","SW Version="+SWVersion));
-		}
-		if (HWVerdion != null && !HWVerdion.equals("")){
-			cmd.addOption(new Option("field","HW Result Version="+HWVerdion));
+		for(String field : fieldValues.keySet()){
+			cmd.addOption(new Option("field",field + "=" + fieldValues.get(field)));
 		}
 		cmd.addSelection(caseID);
 		try{

@@ -32,8 +32,8 @@ public class ExcelUtil {
 
 	private static List<String> caseFields = new ArrayList<>();
 	private static List<String> stepFields = new ArrayList<>();
-	private static List<String> resultFields = new ArrayList<>();// Test
-																	// Result不做导入处理
+	private static List<String> resultFields = new ArrayList<>();// Test ResultHeader信息
+	private static Map<String,String> resultFieldsMap = new HashMap<>();
 	private static Map<String, List<String>> importHeadersMap = new HashMap<>();// 根据导入模板保存
 																				// field
 	public String[][] tableFields = null;
@@ -154,11 +154,12 @@ public class ExcelUtil {
 								Map<String, String> map = new HashMap<>();
 								String type = fields.getAttribute("type");
 								map.put("type", type);
+								String field = fields.getAttribute("field");
 								if (TEST_STEP.equals(type) && !stepFields.contains(name)) {
 									stepFields.add(name);
 								} else if (TEST_RESULT.equals(type) && !resultFields.contains(name)) {
 									resultFields.add(name);
-									// testResulFields.add(name);
+									resultFieldsMap.put(name, field);
 								} else if (!TEST_STEP.equals(type) && !TEST_RESULT.equals(type)
 										&& !caseFields.contains(name)) {
 									caseFields.add(name);
@@ -167,7 +168,7 @@ public class ExcelUtil {
 								if (TEST_STEP.equals(type) && !testStepFields.contains(name)) {
 									testStepFields.add(name);
 								}
-								String field = fields.getAttribute("field");
+							
 								map.put("field", field);
 								// 获取 excelField 的 onlyCreate 属性 ， 若没有填写则默认为
 								// false
@@ -1533,16 +1534,21 @@ public class ExcelUtil {
 			for (Map<String, String> result : resultDatas) {
 				String sessionId = result.get(SESSION_ID);
 				String verdict = result.get(VERDICT);
-				String observedResult = result.get(OBSERVED_RESULT);
 				String annotation = result.get(ANNOTATION);
-				String serverity = result.get(SERVERITY);
-				String reproducibility = result.get(REPRODUCIBILITY);
-				String SWVersion = result.get(SW_VERSION);
-				String HWVerdion = result.get(HW_VERSION);
+				Map<String,String> resultMap = new HashMap<>();
+				for(String header : resultFields) {
+					if(!SESSION_ID.equals(header) && !VERDICT.equals(header) && !ANNOTATION.equals(header)){
+						String field = resultFieldsMap.get(header);
+						String value = result.get(field);
+						if(value != null){
+							resultMap.put(field, value);
+						}
+					}
+				}
 				if (resultRecord.get(sessionId) == null){//如果查到系统当前的test result为空，则把excel模板中读取到的test result数据导入 02/19
-					cmd.createResult(sessionId,verdict,observedResult,annotation,serverity,reproducibility,SWVersion,HWVerdion,caseID);
+					cmd.createResult(sessionId,verdict,annotation,caseID,resultMap);
 				}else{//更新系统当前的test result
-					cmd.editResult(sessionId,verdict,observedResult,annotation,serverity,reproducibility,SWVersion,HWVerdion,caseID);
+					cmd.editResult(sessionId,verdict,annotation,caseID,resultMap);
 				}
 			}
 		}
