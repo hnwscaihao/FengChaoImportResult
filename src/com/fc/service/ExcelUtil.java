@@ -891,13 +891,10 @@ public class ExcelUtil {
 																		// USER_FULLNAME_RECORD
 		Map<String, Object> newMap = null;
 		StringBuffer allMessage = new StringBuffer();
-		int j = 1;// test result循环下标
 		List<String> sessionIds = null;
 		Map<String, List<String>> sessionInfoRecord = new HashMap<>();// 只获取系统当前Session的信息。
-		Map<String, String> testsRecords = new HashMap<>();
-		Map<String, String> sysTestIdsMap = new HashMap<>();
-		;
 		for (int i = 0; i < data.size(); i++) {
+			int j = 1;// test result循环下标  每行重置 j
 			boolean hasError = false;// 校验出错误
 			StringBuffer errorMessage = new StringBuffer();
 			Map<String, Object> rowMap = data.get(i);
@@ -1080,7 +1077,7 @@ public class ExcelUtil {
 							String sessionId = map.get(SESSION_ID);
 							if (sessionId == null || sessionId.equals(""))// 对sessionId做校验
 								allMessage.append("line " + (i + 3) + "Session ID is Empty for Import Test Result! \n");
-							List<String> caseList = sessionInfoRecord.get(sessionId);
+							List<String> caseList = sessionInfoRecord.get(sessionId);//当前Session关联的所有Test Case
 							if (caseList == null) {// 当前Session未查询时，查询Session信息
 								sessionIds = new ArrayList<>();
 								sessionIds.add(sessionId);
@@ -1115,13 +1112,12 @@ public class ExcelUtil {
 											+ "Test Session与当前测试用例未建立关联关系！ \n");
 								}
 							} else {
-								allMessage.append(
-										"第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session ID不正确，未查询到对应信息！ \n");
+								allMessage.append("第" + (i + 3) + "行" + "，" + "第" + j + "轮" + "Test Session ID不正确，未查询到对应信息！ \n");
 							}
 						}
-						j++;
 						newMap.put(TEST_RESULT, currentResults);
 					}
+					j++;
 				}
 			}
 			resultData.add(newMap);
