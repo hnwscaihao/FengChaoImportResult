@@ -367,10 +367,9 @@ public class ExcelUtil {
 				if (stepField && stepFields.contains(field)) {// Test Step 字段  把当初的||改成了现在的&& 02/15
 					stepMap.put(field, value);
 				}
-				//02/15 存值冗余
-				/*else {// Test Case字段放入Map
+				else {// Test Case字段放入Map
 					map.put(field, value);
-				}*/
+				}
 
 			}
 			if (!stepList.isEmpty()) {
@@ -389,6 +388,9 @@ public class ExcelUtil {
 	@SuppressWarnings("deprecation")
 	public String getCellVal(Cell cell) {
 		String value = "";
+		if(cell == null){
+			return value;
+		}
 		switch (cell.getCellType()) {
 		case Cell.CELL_TYPE_STRING:
 			value = cell.getStringCellValue();
