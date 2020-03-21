@@ -825,7 +825,7 @@ public class MKSCommand {
 		List<String> projects = new ArrayList<String>();
 		Command cmd = new Command("im", "issues");
 		cmd.addOption(new Option("fields","Project"));
-		String query = "((field[Type]=Project) )";
+		String query = "((field[Type]=Project) and (field[TeamMembers]=" +user+ "))";
 		cmd.addOption(new Option("queryDefinition",query));
 		Response res = mksCmdRunner.execute(cmd);
 		if (res != null) {
