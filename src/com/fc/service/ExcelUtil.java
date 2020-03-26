@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,6 +18,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -1081,6 +1083,31 @@ public class ExcelUtil {
 							if (sessionId == null || sessionId.equals(""))// 对sessionId做校验
 								allMessage.append("line " + (i + 3) + "Session ID is Empty for Import Test Result! \n");
 							List<String> caseList = sessionInfoRecord.get(sessionId);//当前Session关联的所有Test Case
+							Set<Entry<String, String>> entrySet = map.entrySet();
+							for (Entry<String, String> entry : entrySet) {
+                                String displayKey = entry.getKey();
+                                String key = resultFieldsMap.get(displayKey);
+                                String fieldType = FIELD_TYPE_RECORD.get(key);
+                                String value = entry.getValue();
+                                if(PICK_FIELD_RECORD.containsKey(key)){
+                                    List<String> includes = PICK_FIELD_RECORD.get(key);
+                                    if(!includes.contains(value)) {
+                                        allMessage.append("第" + (i + 3) + "行 ").append(String.format("字段【%s】不正确，合法值范围【%s】\r\n", key, StringUtil.join(",", includes)));
+                                    }
+                                    
+                                }else if("date".equals(fieldType)) {
+                                    String msg = checkDate(value);
+                                    if(msg!=null && msg.length()>0) {
+                                        allMessage.append(msg);
+                                    }else{
+                                    	SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    	SimpleDateFormat valueSdf = new SimpleDateFormat("MMM d, yyyy h:mm:ss a",Locale.ENGLISH);
+                                    	Date date = sdf2.parse(value);
+                                    	value = valueSdf.format(date);
+                                    	map.put(displayKey, value);
+                                    }
+                                }
+                            }
 							if (caseList == null) {// 当前Session未查询时，查询Session信息
 								sessionIds = new ArrayList<>();
 								sessionIds.add(sessionId);
