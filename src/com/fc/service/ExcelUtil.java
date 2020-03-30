@@ -81,7 +81,8 @@ public class ExcelUtil {
 
 	private static String CONTENT_TYPE;
 
-	public static final Map<String, String> DOC_TYPE_MAP = new HashMap<String, String>();
+	public static final Map<String, String> DOC_TYPE_MAP = new HashMap<>();
+	public static final Map<String, String> DEFAULT_CATEGORY_MAP = new HashMap<>();
 
 	private Map<String, CellRangeAddress> cellRangeMap = new HashMap<String, CellRangeAddress>();
 
@@ -126,94 +127,95 @@ public class ExcelUtil {
 																		// ImportType
 		if (importTypes == null || importTypes.getLength() == 0) {
 			throw new Exception("Can't not parse xml because of don't has \"importType\"");
-		} else {
-			// 循环 刚才拿到的所有ImportType
-			for (int j = 0; j < importTypes.getLength(); j++) {
-				Element importType = (Element) importTypes.item(j);
-				// 获取XML 文件的name 和 Type
-				String typeName = importType.getAttribute("name");
-				String documentType = importType.getAttribute("type");
-				DOC_TYPE_MAP.put(typeName, documentType);
-				typeList.add(typeName);
-				if (selectImportType != null && !"".equals(selectImportType) && typeName.equals(selectImportType)) {
-					String structureStr = importType.getAttribute("structure");
-					if (structureStr != null && !"".equals(structureStr)) {
-						parentStructure = Boolean.valueOf(structureStr);
-					}
-					NodeList excelFields = importType.getElementsByTagName("excelField");
-					Map<String, Map<String, String>> headerConfig = new HashMap<>();
-					headerConfigs.put(typeName, headerConfig);
-					List<String> testStepFields = new ArrayList<>();
-					importHeadersMap.put(typeName + "-stepFields", testStepFields);
-					try {
-						if (excelFields == null || excelFields.getLength() == 0) {
-							throw new Exception("Can't not parse xml because of don't has \"excelField\"");
-						} else {
-							tableFields = new String[excelFields.getLength()][2];
-							for (int i = 0; i < excelFields.getLength(); i++) {
-								Element fields = (Element) excelFields.item(i);
-								String name = fields.getAttribute("name");
-								Map<String, String> map = new HashMap<>();
-								String type = fields.getAttribute("type");
-								map.put("type", type);
-								String field = fields.getAttribute("field");
-								if (TEST_STEP.equals(type) && !stepFields.contains(name)) {
-									stepFields.add(name);
-								} else if (TEST_RESULT.equals(type) && !resultFields.contains(name)) {
-									resultFields.add(name);
-									resultFieldsMap.put(name, field);
-								} else if (!TEST_STEP.equals(type) && !TEST_RESULT.equals(type)
-										&& !caseFields.contains(name)) {
-									caseFields.add(name);
-									CONTENT_TYPE = type;
-								}
-								if (TEST_STEP.equals(type) && !testStepFields.contains(name)) {
-									testStepFields.add(name);
-								}
-							
-								map.put("field", field);
-								// 获取 excelField 的 onlyCreate 属性 ， 若没有填写则默认为
-								// false
-								String onlyCreate = fields.getAttribute("onlyCreate");
-								if (onlyCreate == null || onlyCreate.equals("")) {
-									map.put("onlyCreate", "false");
-								} else {
-									map.put("onlyCreate", onlyCreate);
-								}
-								String overRide = fields.getAttribute("overRide");
-								if (overRide == null || overRide.equals("")) {
-									map.put("overRide", "true");
-								} else {
-									map.put("overRide", overRide);
-								}
-								tableFields[i][0] = name;
-								tableFields[i][1] = field;
-								if (fields.hasAttribute(PARENT_FIELD)) {
-									String parentField = fields.getAttribute(PARENT_FIELD);
-									map.put(PARENT_FIELD, parentField);
-									tableFields[i][1] = parentField;
-									hasParentField.put(field, parentField);
-								}
-								if (fields.hasAttribute(NEED_FIELD_SET)) {
-									String needField = fields.getAttribute(NEED_FIELD_SET);
-									map.put(NEED_FIELD_SET, needField);
-								}
-								if (fields.hasAttribute(CHAPTER_FIELD)) {
-									String needField = fields.getAttribute(CHAPTER_FIELD);
-									map.put(CHAPTER_FIELD, needField);
-								}
-								headerConfig.put(name, map);
+		}
+		// 循环 刚才拿到的所有ImportType
+		for (int j = 0; j < importTypes.getLength(); j++) {
+			Element importType = (Element) importTypes.item(j);
+			// 获取XML 文件的name 和 Type
+			String typeName = importType.getAttribute("name");
+			String documentType = importType.getAttribute("type");
+			String defaultCategory = importType.getAttribute("defaultCategory");
+			DOC_TYPE_MAP.put(typeName, documentType);
+			DEFAULT_CATEGORY_MAP.put(typeName, defaultCategory);
+			typeList.add(typeName);
+			if (selectImportType != null && !"".equals(selectImportType) && typeName.equals(selectImportType)) {
+				String structureStr = importType.getAttribute("structure");
+				if (structureStr != null && !"".equals(structureStr)) {
+					parentStructure = Boolean.valueOf(structureStr);
+				}
+				NodeList excelFields = importType.getElementsByTagName("excelField");
+				Map<String, Map<String, String>> headerConfig = new HashMap<>();
+				headerConfigs.put(typeName, headerConfig);
+				List<String> testStepFields = new ArrayList<>();
+				importHeadersMap.put(typeName + "-stepFields", testStepFields);
+				try {
+					if (excelFields == null || excelFields.getLength() == 0) {
+						throw new Exception("Can't not parse xml because of don't has \"excelField\"");
+					} else {
+						tableFields = new String[excelFields.getLength()][2];
+						for (int i = 0; i < excelFields.getLength(); i++) {
+							Element fields = (Element) excelFields.item(i);
+							String name = fields.getAttribute("name");
+							Map<String, String> map = new HashMap<>();
+							String type = fields.getAttribute("type");
+							map.put("type", type);
+							String field = fields.getAttribute("field");
+							if (TEST_STEP.equals(type) && !stepFields.contains(name)) {
+								stepFields.add(name);
+							} else if (TEST_RESULT.equals(type) && !resultFields.contains(name)) {
+								resultFields.add(name);
+								resultFieldsMap.put(name, field);
+							} else if (!TEST_STEP.equals(type) && !TEST_RESULT.equals(type)
+									&& !caseFields.contains(name)) {
+								caseFields.add(name);
+								CONTENT_TYPE = type;
 							}
+							if (TEST_STEP.equals(type) && !testStepFields.contains(name)) {
+								testStepFields.add(name);
+							}
+						
+							map.put("field", field);
+							// 获取 excelField 的 onlyCreate 属性 ， 若没有填写则默认为
+							// false
+							String onlyCreate = fields.getAttribute("onlyCreate");
+							if (onlyCreate == null || onlyCreate.equals("")) {
+								map.put("onlyCreate", "false");
+							} else {
+								map.put("onlyCreate", onlyCreate);
+							}
+							String overRide = fields.getAttribute("overRide");
+							if (overRide == null || overRide.equals("")) {
+								map.put("overRide", "true");
+							} else {
+								map.put("overRide", overRide);
+							}
+							tableFields[i][0] = name;
+							tableFields[i][1] = field;
+							if (fields.hasAttribute(PARENT_FIELD)) {
+								String parentField = fields.getAttribute(PARENT_FIELD);
+								map.put(PARENT_FIELD, parentField);
+								tableFields[i][1] = parentField;
+								hasParentField.put(field, parentField);
+							}
+							if (fields.hasAttribute(NEED_FIELD_SET)) {
+								String needField = fields.getAttribute(NEED_FIELD_SET);
+								map.put(NEED_FIELD_SET, needField);
+							}
+							if (fields.hasAttribute(CHAPTER_FIELD)) {
+								String needField = fields.getAttribute(CHAPTER_FIELD);
+								map.put(CHAPTER_FIELD, needField);
+							}
+							headerConfig.put(name, map);
 						}
-					} catch (ParserConfigurationException e) {
-						logger.error("parse config file exception", e);
-					} catch (SAXException e) {
-						logger.error("get config file exception", e);
-					} catch (IOException e) {
-						logger.error("io exception", e);
-					} finally {
-						logger.info("get info : \nheaderConfig : " + headerConfig);
 					}
+				} catch (ParserConfigurationException e) {
+					logger.error("parse config file exception", e);
+				} catch (SAXException e) {
+					logger.error("get config file exception", e);
+				} catch (IOException e) {
+					logger.error("io exception", e);
+				} finally {
+					logger.info("get info : \nheaderConfig : " + headerConfig);
 				}
 			}
 		}
@@ -1360,7 +1362,9 @@ public class ExcelUtil {
 		// }
 		// 需修改
 		String defaultCategory = "Comment";// 设置Category,默认为Comment，根据选择模板不同，设置不同默认值
-		if (SOFTWARE_UNIT_TEST.equals(importType) || DCT_TEST.equals(importType)) {
+		if(DEFAULT_CATEGORY_MAP.containsKey(importType)) {
+		    defaultCategory = DEFAULT_CATEGORY_MAP.get(importType);
+		}else if (SOFTWARE_UNIT_TEST.equals(importType) || DCT_TEST.equals(importType)) {
 			defaultCategory = "Software Unit Test";
 		} else if (SOFTWARE_INTEGRATION_TEST.equals(importType)) {
 			defaultCategory = "Software Integration Test";
