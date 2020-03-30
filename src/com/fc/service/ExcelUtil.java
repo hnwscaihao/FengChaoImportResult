@@ -1096,7 +1096,6 @@ public class ExcelUtil {
                                     if(!includes.contains(value)) {
                                         allMessage.append("第" + (i + 3) + "行 ").append(String.format("字段【%s】不正确，合法值范围【%s】\r\n", key, StringUtil.join(",", includes)));
                                     }
-                                    
                                 }else if("date".equals(fieldType)) {
                                     String msg = checkDate(value);
                                     if(msg!=null && msg.length()>0) {
@@ -1572,7 +1571,7 @@ public class ExcelUtil {
 				for(String header : resultFields) {
 					if(!SESSION_ID.equals(header) && !VERDICT.equals(header) && !ANNOTATION.equals(header)){
 						String field = resultFieldsMap.get(header);
-						String value = result.get(field);
+						String value = result.get(header);
 						if(value != null){
 							resultMap.put(field, value);
 						}
